@@ -1,0 +1,173 @@
+// This is your Prisma schema file
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Auth ────────────────────────────────────────────────────────────────────
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String?
+  role      Role     @default(MANAGER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  VIEWER
+}
+
+// ─── Property ────────────────────────────────────────────────────────────────
+model Floor {
+  id     String @id @default(cuid())
+  number Int    @unique // 1, 2, 3 …
+  label  String // "1st Floor", "2nd Floor" …
+  units  Unit[]
+}
+
+model Unit {
+  id         String   @id @default(cuid())
+  unitNumber String   @unique // e.g. "1F-1", "2F-3"
+  floor      Floor    @relation(fields: [floorId], references: [id])
+  floorId    String
+  type       UnitType
+  rentAmount Float
+  isOccupied Boolean  @default(false)
+  hasWifi    Boolean  @default(true)
+  wifiAmount Float    @default(1500)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenants       Tenant[]
+  invoices      Invoice[]
+  waterReadings WaterReading[]
+}
+
+enum UnitType {
+  BEDSITTER
+  ONE_BEDROOM
+  TWO_BEDROOM
+}
+
+// ─── Tenant ──────────────────────────────────────────────────────────────────
+model Tenant {
+  id          String    @id @default(cuid())
+  firstName   String
+  lastName    String
+  phone       String
+  email       String?
+  idNumber    String?
+  unit        Unit      @relation(fields: [unitId], references: [id])
+  unitId      String
+  moveInDate  DateTime
+  moveOutDate DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  invoices Invoice[]
+  payments Payment[]
+}
+
+// ─── Water ───────────────────────────────────────────────────────────────────
+model WaterReading {
+  id              String   @id @default(cuid())
+  unit            Unit     @relation(fields: [unitId], references: [id])
+  unitId          String
+  month           Int // 1-12
+  year            Int
+  previousReading Float
+  currentReading  Float
+  unitsUsed       Float
+  ratePerUnit     Float    @default(150) // KES per unit
+  totalAmount     Float
+  createdAt       DateTime @default(now())
+
+  @@unique([unitId, month, year])
+}
+
+// ─── Invoice ─────────────────────────────────────────────────────────────────
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique
+  unit          Unit          @relation(fields: [unitId], references: [id])
+  unitId        String
+  tenant        Tenant        @relation(fields: [tenantId], references: [id])
+  tenantId      String
+  month         Int
+  year          Int
+  rentAmount    Float
+  waterAmount   Float         @default(0)
+  wifiAmount    Float         @default(0)
+  otherCharges  Float         @default(0)
+  totalAmount   Float
+  paidAmount    Float         @default(0)
+  balanceDue    Float
+  status        InvoiceStatus @default(UNPAID)
+  dueDate       DateTime
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  payments Payment[]
+
+  @@unique([unitId, month, year])
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
+// ─── Payment ─────────────────────────────────────────────────────────────────
+model Payment {
+  id        String        @id @default(cuid())
+  tenant    Tenant        @relation(fields: [tenantId], references: [id])
+  tenantId  String
+  invoice   Invoice       @relation(fields: [invoiceId], references: [id])
+  invoiceId String
+  amount    Float
+  method    PaymentMethod
+  reference String? // M-Pesa transaction code
+  notes     String?
+  paidAt    DateTime      @default(now())
+  createdAt DateTime      @default(now())
+}
+
+enum PaymentMethod {
+  MPESA
+  CASH
+  BANK_TRANSFER
+  CHEQUE
+}
+
+// ─── Expense ─────────────────────────────────────────────────────────────────
+model Expense {
+  id          String          @id @default(cuid())
+  category    ExpenseCategory
+  description String
+  amount      Float
+  date        DateTime
+  receipt     String? // URL
+  createdAt   DateTime        @default(now())
+}
+
+enum ExpenseCategory {
+  MAINTENANCE
+  REPAIRS
+  UTILITIES
+  CLEANING
+  SECURITY
+  INSURANCE
+  OTHER
+}

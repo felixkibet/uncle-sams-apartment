@@ -1,0 +1,158 @@
+Folder PATH listing
+Volume serial number is 2E6D-1B1F
+C:.
+¦   auth.config.ts
+¦   middleware.ts
+¦   tree.txt
+¦   
++---app
+¦   ¦   error.tsx
+¦   ¦   favicon.ico
+¦   ¦   globals.css
+¦   ¦   layout.tsx
+¦   ¦   not-found.tsx
+¦   ¦   page.tsx
+¦   ¦   
+¦   +---(auth)
+¦   ¦   ¦   layout.tsx
+¦   ¦   ¦   
+¦   ¦   +---login
+¦   ¦           page.tsx
+¦   ¦           
+¦   +---(dashboard)
+¦   ¦   ¦   layout.tsx
+¦   ¦   ¦   loading.tsx
+¦   ¦   ¦   
+¦   ¦   +---dashboard
+¦   ¦   ¦       page.tsx
+¦   ¦   ¦       
+¦   ¦   +---expenses
+¦   ¦   ¦       page.tsx
+¦   ¦   ¦       
+¦   ¦   +---invoices
+¦   ¦   ¦   ¦   page.tsx
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---[id]
+¦   ¦   ¦           page.tsx
+¦   ¦   ¦           
+¦   ¦   +---payments
+¦   ¦   ¦       page.tsx
+¦   ¦   ¦       
+¦   ¦   +---reports
+¦   ¦   ¦       page.tsx
+¦   ¦   ¦       
+¦   ¦   +---settings
+¦   ¦   ¦       page.tsx
+¦   ¦   ¦       
+¦   ¦   +---tenants
+¦   ¦   ¦   ¦   page.tsx
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---[id]
+¦   ¦   ¦           page.tsx
+¦   ¦   ¦           
+¦   ¦   +---units
+¦   ¦   ¦   ¦   page.tsx
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---[id]
+¦   ¦   ¦           page.tsx
+¦   ¦   ¦           
+¦   ¦   +---water
+¦   ¦           page.tsx
+¦   ¦           
+¦   +---api
+¦       +---auth
+¦       ¦   +---[...nextauth]
+¦       ¦           route.ts
+¦       ¦           
+¦       +---dashboard
+¦       ¦       route.ts
+¦       ¦       
+¦       +---expenses
+¦       ¦   ¦   route.ts
+¦       ¦   ¦   
+¦       ¦   +---[id]
+¦       ¦           route.ts
+¦       ¦           
+¦       +---floors
+¦       ¦   ¦   route.ts
+¦       ¦   ¦   
+¦       ¦   +---[id]
+¦       ¦           route.ts
+¦       ¦           
+¦       +---invoices
+¦       ¦   ¦   route.ts
+¦       ¦   ¦   
+¦       ¦   +---[id]
+¦       ¦           route.ts
+¦       ¦           
+¦       +---payments
+¦       ¦   ¦   route.ts
+¦       ¦   ¦   
+¦       ¦   +---[id]
+¦       ¦           route.ts
+¦       ¦           
+¦       +---reports
+¦       ¦       route.ts
+¦       ¦       
+¦       +---tenants
+¦       ¦   ¦   route.ts
+¦       ¦   ¦   
+¦       ¦   +---[id]
+¦       ¦           route.ts
+¦       ¦           
+¦       +---units
+¦       ¦   ¦   route.ts
+¦       ¦   ¦   
+¦       ¦   +---[id]
+¦       ¦           route.ts
+¦       ¦           
+¦       +---users
+¦       ¦   ¦   route.ts
+¦       ¦   ¦   
+¦       ¦   +---[id]
+¦       ¦           route.ts
+¦       ¦           
+¦       +---water
+¦           ¦   route.ts
+¦           ¦   
+¦           +---[id]
+¦                   route.ts
+¦                   
++---components
+¦   ¦   Providers.tsx
+¦   ¦   
+¦   +---dashboard
+¦   +---invoices
+¦   +---layout
+¦   ¦       Sidebar.tsx
+¦   ¦       TopBar.tsx
+¦   ¦       
+¦   +---payments
+¦   +---reports
+¦   +---tenants
+¦   +---ui
+¦   ¦       Badge.tsx
+¦   ¦       ConfirmDialog.tsx
+¦   ¦       DataTable.tsx
+¦   ¦       EmptyState.tsx
+¦   ¦       index.ts
+¦   ¦       Modal.tsx
+¦   ¦       Skeleton.tsx
+¦   ¦       StatCard.tsx
+¦   ¦       Toast.tsx
+¦   ¦       
+¦   +---units
+¦   +---water
++---hooks
+¦       index.ts
+¦       
++---lib
+¦       auth.ts
+¦       db.ts
+¦       utils.ts
+¦       
++---styles
++---types
+        index.ts
+        next-auth.d.ts
+        
