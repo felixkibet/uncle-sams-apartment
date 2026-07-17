@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts, degrees } from "pdf-lib";
 import { db } from "@/lib/db";
 import { formatCurrency, formatDate, formatMonth } from "@/lib/utils";
 
@@ -83,7 +83,6 @@ export async function GET(_: NextRequest, { params }: { params: any }) {
       font: fontRegular,
       color: rgb(0.78, 0.81, 0.89),
     });
-
     const statusText = invoice.status.replace(/_/g, " ");
     const statusColor =
       invoice.status === "PAID"
@@ -97,40 +96,75 @@ export async function GET(_: NextRequest, { params }: { params: any }) {
         : invoice.status === "PARTIAL"
           ? rgb(0.99, 0.94, 0.84)
           : rgb(0.99, 0.9, 0.92);
-    const statusWidth = fontBold.widthOfTextAtSize(statusText, 11) + 32;
-    const statusStampX = width - MARGIN - statusWidth;
-    const statusStampY = height - 58;
 
-    pageContent.drawRectangle({
-      x: statusStampX,
-      y: statusStampY,
-      width: statusWidth,
-      height: 26,
+    const stampDiameter = 72;
+    const stampRadius = stampDiameter / 2;
+    const stampX = width - MARGIN - 180 - stampDiameter - 12;
+    const stampY = height - 96;
+    const stampCenterX = stampX + stampRadius;
+    const stampCenterY = stampY + stampRadius;
+    const stampAngle = -12;
+
+    pageContent.drawEllipse({
+      x: stampCenterX,
+      y: stampCenterY,
+      xScale: stampRadius,
+      yScale: stampRadius,
       color: statusBg,
-      borderRadius: 12,
-    });
-    pageContent.drawRectangle({
-      x: statusStampX,
-      y: statusStampY,
-      width: statusWidth,
-      height: 26,
       borderColor: statusColor,
-      borderWidth: 1.5,
-      borderRadius: 12,
+      borderWidth: 3,
+      rotate: degrees(stampAngle),
+      opacity: 0.95,
     });
-    drawText(statusText, {
-      x: statusStampX + 14,
-      y: statusStampY + 6,
-      size: 10,
+
+    pageContent.drawEllipse({
+      x: stampCenterX,
+      y: stampCenterY,
+      xScale: stampRadius - 12,
+      yScale: stampRadius - 12,
+      color: rgb(1, 1, 1),
+      rotate: degrees(stampAngle),
+    });
+
+    const dashCount = 28;
+    for (let i = 0; i < dashCount; i++) {
+      const angle = (Math.PI * 2 * i) / dashCount + 0.08;
+      const outerDash = stampRadius - 2;
+      const innerDash = stampRadius - 8;
+      const x1 = stampCenterX + Math.cos(angle) * outerDash;
+      const y1 = stampCenterY + Math.sin(angle) * outerDash;
+      const x2 = stampCenterX + Math.cos(angle) * innerDash;
+      const y2 = stampCenterY + Math.sin(angle) * innerDash;
+      pageContent.drawLine({
+        start: { x: x1, y: y1 },
+        end: { x: x2, y: y2 },
+        thickness: 1.2,
+        color: statusColor,
+        opacity: 0.85,
+      });
+    }
+
+    const stampText = statusText.toUpperCase();
+    const stampSize = 12;
+    const textWidth = fontBold.widthOfTextAtSize(stampText, stampSize);
+    pageContent.drawText(stampText, {
+      x: stampCenterX - textWidth / 2,
+      y: stampCenterY - stampSize / 2 + 2,
+      size: stampSize,
       font: fontBold,
       color: statusColor,
+      rotate: degrees(stampAngle),
     });
-    drawText("PAYMENT STATUS", {
-      x: statusStampX + 14,
-      y: statusStampY + 18,
-      size: 6.5,
+
+    const labelText = "PAYMENT STATUS";
+    const labelSize = 7;
+    pageContent.drawText(labelText, {
+      x: stampCenterX - fontBold.widthOfTextAtSize(labelText, labelSize) / 2,
+      y: stampCenterY - stampRadius / 2 + 3,
+      size: labelSize,
       font: fontBold,
       color: statusColor,
+      rotate: degrees(stampAngle),
     });
 
     const contactX = width - MARGIN - 180;
@@ -382,7 +416,7 @@ export async function GET(_: NextRequest, { params }: { params: any }) {
         "Content-Disposition": `attachment; filename="invoice-${invoice.invoiceNumber}.pdf"`,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
       { error: String(error.message || error) },
       { status: 500 },
