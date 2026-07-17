@@ -30,6 +30,27 @@ export default function InvoiceDetailPage() {
     }
   }
 
+  async function handleDownloadPdf() {
+    try {
+      const res = await fetch(`/api/invoices/${id}/pdf`, { method: "GET" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Unable to generate PDF");
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `invoice-${invoice.invoiceNumber}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert("Download failed: " + (err.message || err));
+    }
+  }
+
   useEffect(() => { loadInvoice(); }, [id]);
 
   async function loadInvoice() {
@@ -49,9 +70,9 @@ export default function InvoiceDetailPage() {
   ].filter(item => item.amount > 0);
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 max-w-3xl invoice-page">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 no-print">
         <button onClick={() => router.back()} className="btn-ghost p-2">
           <ArrowLeft className="h-4 w-4" />
         </button>
@@ -64,8 +85,25 @@ export default function InvoiceDetailPage() {
         </span>
       </div>
 
+      {/* Print Header */}
+      <div className="invoice-print-header hidden">
+        <div className="invoice-print-header-inner">
+          <div>
+            <p className="invoice-print-label">Uncle Sam&apos;s Apartment</p>
+            <h2>Invoice {invoice.invoiceNumber}</h2>
+            <p>{formatMonth(invoice.month, invoice.year)} · Due {formatDate(invoice.dueDate)}</p>
+          </div>
+          <div style={{ minWidth: 220, textAlign: "right" }}>
+            <p className="invoice-print-label">Contact</p>
+            <p>0738 822 454</p>
+            <p>unglesam@gmail.com</p>
+            <p>Nyayo Gate B, Naivas Court, Embakasi</p>
+          </div>
+        </div>
+      </div>
+
       {/* Invoice Card */}
-      <div className="card overflow-hidden">
+      <div className="card overflow-hidden invoice-print-card">
         {/* Invoice Header */}
         <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-6 text-white">
           <div className="flex justify-between items-start">
@@ -142,7 +180,7 @@ export default function InvoiceDetailPage() {
         </div>
 
         {/* Actions */}
-        <div className="p-6 flex gap-3">
+        <div className="p-6 flex gap-3 print-hidden">
           {invoice.status !== "PAID" && (
             <button onClick={() => setShowPayment(true)} className="btn-primary flex-1">
               <CreditCard className="h-4 w-4" /> Record Payment
@@ -154,8 +192,8 @@ export default function InvoiceDetailPage() {
               <CheckCircle2 className="h-5 w-5" /> Fully Paid
             </div>
           )}
-          <button onClick={() => window.print()} className="btn-outline">
-            <Printer className="h-4 w-4" /> Print
+          <button onClick={handleDownloadPdf} className="btn-outline">
+            <Printer className="h-4 w-4" /> Download PDF
           </button>
         </div>
       </div>
