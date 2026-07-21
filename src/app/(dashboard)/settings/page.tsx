@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import { useLocalStorage } from "@/hooks";
 import {
   Building2, Phone, Mail, MapPin, Save, Loader2,
   Lock, CheckCircle2, User, Shield,
@@ -14,7 +15,15 @@ export default function SettingsPage() {
   // Property form state
   const [propSaving, setPropSaving] = useState(false);
   const [propSaved, setPropSaved] = useState(false);
-  const [prop, setProp] = useState({
+  const [prop, setProp] = useLocalStorage<{
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    waterRate: string;
+    wifiRate: string;
+    rentDueDay: string;
+  }>("uncle-sams-apt-settings", {
     name: "Uncle Sam's Apartment",
     email: "unglesam@gmail.com",
     phone: "0738822454",

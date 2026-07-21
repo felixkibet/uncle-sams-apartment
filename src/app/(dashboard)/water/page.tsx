@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocalStorage } from "@/hooks";
 import { Droplets, Plus, X, Loader2, Save, AlertCircle } from "lucide-react";
 import { formatCurrency, formatMonth } from "@/lib/utils";
 
@@ -21,13 +22,26 @@ export default function WaterPage() {
   const [readings, setReadings] = useState<Reading[]>([]);
   const [loading, setLoading] = useState(true);
   const now = new Date();
+  const [settings] = useLocalStorage<{
+    waterRate: string;
+    wifiRate: string;
+    rentDueDay: string;
+  }>("uncle-sams-apt-settings", {
+    waterRate: "150",
+    wifiRate: "1500",
+    rentDueDay: "5",
+  });
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [year, setYear] = useState(now.getFullYear());
-  const [ratePerUnit, setRatePerUnit] = useState(150);
+  const [ratePerUnit, setRatePerUnit] = useState(Number(settings.waterRate) || 150);
   const [showEntry, setShowEntry] = useState(false);
   const [selected, setSelected] = useState<Unit | null>(null);
 
   useEffect(() => { loadData(); }, [month, year]);
+
+  useEffect(() => {
+    setRatePerUnit(Number(settings.waterRate) || 150);
+  }, [settings.waterRate]);
 
   async function loadData() {
     setLoading(true);

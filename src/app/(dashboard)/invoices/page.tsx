@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocalStorage } from "@/hooks";
 import { Plus, FileText, Search, X, Loader2, Zap } from "lucide-react";
 import { formatCurrency, formatDate, formatMonth } from "@/lib/utils";
 
@@ -27,6 +28,15 @@ export default function InvoicesPage() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [showAdd, setShowAdd] = useState(false);
   const [showBulk, setShowBulk] = useState(false);
+  const [settings] = useLocalStorage<{
+    waterRate: string;
+    wifiRate: string;
+    rentDueDay: string;
+  }>("uncle-sams-apt-settings", {
+    waterRate: "150",
+    wifiRate: "1500",
+    rentDueDay: "5",
+  });
   const now = new Date();
   const [monthFilter, setMonthFilter] = useState(now.getMonth() + 1);
   const [yearFilter, setYearFilter] = useState(now.getFullYear());
@@ -172,7 +182,7 @@ export default function InvoicesPage() {
         </div>
       </div>
 
-      {showAdd && <AddInvoiceModal tenants={tenants} onClose={() => { setShowAdd(false); loadData(); }} />}
+      {showAdd && <AddInvoiceModal tenants={tenants} settings={settings} onClose={() => { setShowAdd(false); loadData(); }} />}
       {showBulk && <BulkGenerateModal onClose={() => { setShowBulk(false); loadData(); }} />}
     </div>
   );
@@ -203,8 +213,9 @@ function exportCsv(invoices: any[]) {
   URL.revokeObjectURL(url);
 }
 
-function AddInvoiceModal({ tenants, onClose }: { tenants: Tenant[]; onClose: () => void }) {
+function AddInvoiceModal({ tenants, settings, onClose }: { tenants: Tenant[]; settings: { waterRate: string; wifiRate: string; rentDueDay: string }; onClose: () => void }) {
   const now = new Date();
+  const [waterNote, setWaterNote] = useState("");
   const [form, setForm] = useState({
     tenantId: "", unitId: "", rentAmount: "", waterAmount: "0", wifiAmount: "0",
     otherCharges: "0", month: now.getMonth() + 1, year: now.getFullYear(),
@@ -219,6 +230,33 @@ function AddInvoiceModal({ tenants, onClose }: { tenants: Tenant[]; onClose: () 
       rentAmount: String(t.unit.rentAmount),
       wifiAmount: t.unit.hasWifi ? String(t.unit.wifiAmount) : "0",
     }));
+  }
+
+  useEffect(() => {
+    if (!form.unitId) return;
+    fetchWaterCharge(form.unitId, form.month, form.year);
+  }, [form.unitId, form.month, form.year]);
+
+  async function fetchWaterCharge(unitId: string, month: number, year: number) {
+    try {
+      const res = await fetch(`/api/water?unitId=${unitId}&month=${month}&year=${year}`);
+      if (!res.ok) {
+        setWaterNote("Unable to load water reading.");
+        setForm(f => ({ ...f, waterAmount: String(Number(settings.waterRate) || 150) }));
+        return;
+      }
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setForm(f => ({ ...f, waterAmount: String(data[0].totalAmount) }));
+        setWaterNote("Water amount loaded from meter reading.");
+      } else {
+        setWaterNote(`No water reading found. Default unit rate is KES ${settings.waterRate}/m³.`);
+        setForm(f => ({ ...f, waterAmount: String(Number(settings.waterRate) || 150) }));
+      }
+    } catch (err) {
+      setWaterNote("Failed to load water reading.");
+      setForm(f => ({ ...f, waterAmount: String(Number(settings.waterRate) || 150) }));
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -280,6 +318,7 @@ function AddInvoiceModal({ tenants, onClose }: { tenants: Tenant[]; onClose: () 
               <div>
                 <label className="label">Water (KES)</label>
                 <input className="input" type="number" value={form.waterAmount} onChange={e => setForm(f => ({ ...f, waterAmount: e.target.value }))} />
+                {waterNote && <p className="text-xs text-slate-500 mt-1">{waterNote}</p>}
               </div>
               <div>
                 <label className="label">WiFi (KES)</label>
@@ -319,7 +358,7 @@ function AddInvoiceModal({ tenants, onClose }: { tenants: Tenant[]; onClose: () 
 
 function BulkGenerateModal({ onClose }: { onClose: () => void }) {
   const now = new Date();
-  const [form, setForm] = useState({ month: now.getMonth() + 1, year: now.getFullYear(), dueDate: "", includeWifi: true });
+  const [form, setForm] = useState({ month: now.getMonth() + 1, year: now.getFullYear(), dueDate: "", includeWifi: true, includeWater: true });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
 
@@ -379,6 +418,10 @@ function BulkGenerateModal({ onClose }: { onClose: () => void }) {
               <div className="flex items-center gap-3">
                 <input type="checkbox" id="wifi" checked={form.includeWifi} onChange={e => setForm(f => ({ ...f, includeWifi: e.target.checked }))} className="h-4 w-4 rounded" />
                 <label htmlFor="wifi" className="text-sm text-slate-700">Include WiFi charges</label>
+              </div>
+              <div className="flex items-center gap-3">
+                <input type="checkbox" id="water" checked={form.includeWater} onChange={e => setForm(f => ({ ...f, includeWater: e.target.checked }))} className="h-4 w-4 rounded" />
+                <label htmlFor="water" className="text-sm text-slate-700">Include Water charges</label>
               </div>
             </div>
             <div className="modal-footer">

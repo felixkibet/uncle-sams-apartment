@@ -21,17 +21,23 @@ export function useFetch<T>(url: string, deps: any[] = []) {
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url, ...deps]);
 
-  useEffect(() => { fetch_(); }, [fetch_]);
+  useEffect(() => {
+    fetch_();
+  }, [fetch_]);
 
   return { data, loading, error, refetch: fetch_ };
 }
 
 // ── useToast ────────────────────────────────────────────────────────────────
 type ToastType = "success" | "error" | "info";
-interface Toast { id: number; message: string; type: ToastType }
+interface Toast {
+  id: number;
+  message: string;
+  type: ToastType;
+}
 
 export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -39,8 +45,11 @@ export function useToast() {
 
   function toast(message: string, type: ToastType = "success") {
     const id = ++counter.current;
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(
+      () => setToasts((prev) => prev.filter((t) => t.id !== id)),
+      4000,
+    );
   }
 
   return { toasts, toast };
@@ -69,6 +78,16 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       return initialValue;
     }
   });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const item = window.localStorage.getItem(key);
+      if (item) setValue(JSON.parse(item));
+    } catch {
+      // ignore
+    }
+  }, [key]);
 
   function set(val: T) {
     setValue(val);

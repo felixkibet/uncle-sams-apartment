@@ -102,7 +102,13 @@ export async function POST(req: NextRequest) {
 // Bulk generate invoices for all active tenants
 export async function PUT(req: NextRequest) {
   try {
-    const { month, year, dueDate, includeWifi = true } = await req.json();
+    const {
+      month,
+      year,
+      dueDate,
+      includeWifi = true,
+      includeWater = true,
+    } = await req.json();
 
     const activeTenants = await db.tenant.findMany({
       where: { isActive: true },
@@ -124,7 +130,7 @@ export async function PUT(req: NextRequest) {
       }
 
       const waterReading = tenant.unit.waterReadings[0];
-      const waterAmount = waterReading?.totalAmount || 0;
+      const waterAmount = includeWater ? waterReading?.totalAmount || 0 : 0;
       const wifiAmount =
         includeWifi && tenant.unit.hasWifi ? tenant.unit.wifiAmount : 0;
       const totalAmount = tenant.unit.rentAmount + waterAmount + wifiAmount;

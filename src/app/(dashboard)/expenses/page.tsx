@@ -10,14 +10,14 @@ type Expense = {
   amount: number; date: string; receipt?: string;
 };
 
-const CATEGORIES = ["MAINTENANCE", "REPAIRS", "UTILITIES", "CLEANING", "SECURITY", "INSURANCE", "OTHER"];
+const CATEGORIES = ["MAINTENANCE", "REPAIRS", "UTILITIES", "PAINT_WORKS", "OTHER"];
 const CATEGORY_COLORS: Record<string, string> = {
   MAINTENANCE: "#3b82f6", REPAIRS: "#ef4444", UTILITIES: "#f59e0b",
-  CLEANING: "#10b981", SECURITY: "#8b5cf6", INSURANCE: "#06b6d4", OTHER: "#64748b",
+  PAINT_WORKS: "#f97316", OTHER: "#64748b",
 };
 const CATEGORY_LABELS: Record<string, string> = {
   MAINTENANCE: "Maintenance", REPAIRS: "Repairs", UTILITIES: "Utilities",
-  CLEANING: "Cleaning", SECURITY: "Security", INSURANCE: "Insurance", OTHER: "Other",
+  PAINT_WORKS: "Paint Works", OTHER: "Other",
 };
 
 export default function ExpensesPage() {
