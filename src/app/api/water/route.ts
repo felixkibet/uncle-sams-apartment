@@ -25,14 +25,19 @@ export async function GET(req: NextRequest) {
         ...(unitId ? { unitId } : {}),
       },
       include: {
-        unit: { include: { floor: true, tenants: { where: { isActive: true } } } },
+        unit: {
+          include: { floor: true, tenants: { where: { isActive: true } } },
+        },
       },
       orderBy: [{ year: "desc" }, { month: "desc" }],
     });
 
     return NextResponse.json(readings);
   } catch {
-    return NextResponse.json({ error: "Failed to fetch water readings" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch water readings" },
+      { status: 500 },
+    );
   }
 }
 
@@ -44,7 +49,7 @@ export async function POST(req: NextRequest) {
     if (data.currentReading < data.previousReading) {
       return NextResponse.json(
         { error: "Current reading cannot be less than previous reading" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -52,7 +57,13 @@ export async function POST(req: NextRequest) {
     const totalAmount = unitsUsed * data.ratePerUnit;
 
     const reading = await db.waterReading.upsert({
-      where: { unitId_month_year: { unitId: data.unitId, month: data.month, year: data.year } },
+      where: {
+        unitId_month_year: {
+          unitId: data.unitId,
+          month: data.month,
+          year: data.year,
+        },
+      },
       create: { ...data, unitsUsed, totalAmount },
       update: { ...data, unitsUsed, totalAmount },
       include: {
@@ -62,7 +73,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(reading, { status: 201 });
   } catch (error) {
-    if (error instanceof z.ZodError) return NextResponse.json({ error: error.errors }, { status: 400 });
-    return NextResponse.json({ error: "Failed to save water reading" }, { status: 500 });
+    if (error instanceof z.ZodError)
+      return NextResponse.json({ error: error.errors }, { status: 400 });
+    return NextResponse.json(
+      { error: "Failed to save water reading" },
+      { status: 500 },
+    );
   }
 }

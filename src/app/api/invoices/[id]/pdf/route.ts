@@ -409,7 +409,9 @@ export async function GET(_: NextRequest, { params }: { params: any }) {
     });
 
     const pdfBytes = await pdfDoc.save();
-    return new NextResponse(pdfBytes, {
+    // convert to Buffer for Response body compatibility
+    const buffer = Buffer.from(pdfBytes);
+    return new NextResponse(buffer, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
@@ -417,8 +419,9 @@ export async function GET(_: NextRequest, { params }: { params: any }) {
       },
     });
   } catch (error) {
+    const err: any = error;
     return NextResponse.json(
-      { error: String(error.message || error) },
+      { error: String((err && err.message) || err) },
       { status: 500 },
     );
   }

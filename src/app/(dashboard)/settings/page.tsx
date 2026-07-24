@@ -28,7 +28,7 @@ export default function SettingsPage() {
     email: "unglesam@gmail.com",
     phone: "0738822454",
     address: "Nyayo Gate B, Naivas Court, Embakasi, Nairobi",
-    waterRate: "150",
+     waterRate: "200",
     wifiRate: "1500",
     rentDueDay: "5",
   });

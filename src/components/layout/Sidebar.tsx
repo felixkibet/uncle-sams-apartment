@@ -7,7 +7,7 @@ import {
   Building2, LayoutDashboard, Home, Users, FileText,
   CreditCard, Droplets, Wifi, BarChart3, Receipt,
   User,
-  Settings, LogOut, ChevronRight
+  Settings, LogOut, ChevronRight, X
 } from "lucide-react";
 
 const NAV = [
@@ -47,7 +47,7 @@ const NAV = [
   },
 ];
 
-export function Sidebar() {
+export function Sidebar({ isOpen = false, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
 
   function isActive(href: string) {
@@ -55,8 +55,16 @@ export function Sidebar() {
     return pathname.startsWith(href);
   }
 
+  const panelClass = `fixed inset-y-0 left-0 w-[260px] flex flex-col bg-gradient-navy z-30 transform transition-transform duration-200 ${
+    isOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"
+  }`;
+
   return (
-    <aside className="fixed inset-y-0 left-0 w-[260px] flex flex-col bg-gradient-navy z-30">
+    <div className="sm:relative">
+      {/* backdrop for mobile when open */}
+      {isOpen && <div className="fixed inset-0 bg-black/40 z-20 sm:hidden" onClick={onClose} />}
+
+      <aside className={panelClass}>
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10">
         <div className="p-2 bg-yellow-500 rounded-xl flex-shrink-0">
@@ -65,6 +73,11 @@ export function Sidebar() {
         <div className="min-w-0">
           <p className="text-white font-bold text-sm leading-tight truncate">Uncle Sam&apos;s</p>
           <p className="text-slate-400 text-xs truncate">Apartment</p>
+        </div>
+        <div className="ml-auto sm:hidden">
+          <button onClick={onClose} className="p-2 rounded-md text-white/90 hover:bg-white/5">
+            <X className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
@@ -110,6 +123,7 @@ export function Sidebar() {
           <span>Sign out</span>
         </button>
       </div>
-    </aside>
+      </aside>
+    </div>
   );
 }

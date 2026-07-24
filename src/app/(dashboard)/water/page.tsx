@@ -22,12 +22,12 @@ export default function WaterPage() {
   const [readings, setReadings] = useState<Reading[]>([]);
   const [loading, setLoading] = useState(true);
   const now = new Date();
-  const [settings] = useLocalStorage<{
+  const [settings, setSettings] = useLocalStorage<{
     waterRate: string;
     wifiRate: string;
     rentDueDay: string;
   }>("uncle-sams-apt-settings", {
-    waterRate: "150",
+    waterRate: "200",
     wifiRate: "1500",
     rentDueDay: "5",
   });
@@ -115,15 +115,19 @@ export default function WaterPage() {
           </div>
           <div>
             <p className="text-xs text-slate-500 uppercase tracking-wider">Rate / Unit</p>
-            <div className="flex items-center gap-2 mt-0.5">
-              <p className="text-2xl font-bold text-slate-900">KES</p>
-              <input
-                type="number"
-                value={ratePerUnit}
-                onChange={e => setRatePerUnit(parseInt(e.target.value))}
-                className="w-20 text-2xl font-bold text-slate-900 bg-transparent border-b-2 border-slate-200 focus:border-yellow-500 outline-none"
-              />
-            </div>
+              <div className="flex items-center gap-2 mt-0.5">
+                <p className="text-2xl font-bold text-slate-900">KES</p>
+                <input
+                  type="number"
+                  value={Number.isNaN(ratePerUnit) ? "" : ratePerUnit}
+                  onChange={e => {
+                    const v = e.target.value === "" ? 0 : parseInt(e.target.value || "0");
+                    setRatePerUnit(v);
+                    try { setSettings((p) => ({ ...p, waterRate: String(v) })); } catch {}
+                  }}
+                  className="w-20 text-2xl font-bold text-slate-900 bg-transparent border-b-2 border-slate-200 focus:border-yellow-500 outline-none"
+                />
+              </div>
           </div>
         </div>
       </div>

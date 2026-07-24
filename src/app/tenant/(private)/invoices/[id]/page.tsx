@@ -13,7 +13,8 @@ export default function TenantInvoiceDetailPage() {
   useEffect(() => {
     async function load() {
       if (!id) return;
-      const res = await fetch(`/api/invoices?invoiceNumber=${encodeURIComponent(id)}`);
+      const invoiceNumber = Array.isArray(id) ? id[0] : id;
+      const res = await fetch(`/api/invoices?invoiceNumber=${encodeURIComponent(invoiceNumber)}`);
       const data = await res.json();
       setInvoice(Array.isArray(data) ? data[0] : data);
       setLoading(false);

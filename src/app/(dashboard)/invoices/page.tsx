@@ -33,7 +33,7 @@ export default function InvoicesPage() {
     wifiRate: string;
     rentDueDay: string;
   }>("uncle-sams-apt-settings", {
-    waterRate: "150",
+    waterRate: "200",
     wifiRate: "1500",
     rentDueDay: "5",
   });

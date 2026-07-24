@@ -52,14 +52,18 @@ export async function PATCH(req: NextRequest, { params }: { params: any }) {
       const transferredUnitId =
         data.unitId && data.unitId !== oldUnitId ? data.unitId : null;
 
+      const updateData: any = {
+        ...data,
+        moveOutDate: data.moveOutDate ? new Date(data.moveOutDate) : undefined,
+      };
+      // Prisma types don't accept explicit null for unitId in update; convert null to undefined
+      if (Object.prototype.hasOwnProperty.call(updateData, "unitId")) {
+        updateData.unitId = updateData.unitId ?? undefined;
+      }
+
       const t = await tx.tenant.update({
         where: { id },
-        data: {
-          ...data,
-          moveOutDate: data.moveOutDate
-            ? new Date(data.moveOutDate)
-            : undefined,
-        },
+        data: updateData,
         include: { unit: { include: { floor: true } } },
       });
 

@@ -13,7 +13,7 @@ function getCookieValue(cookieHeader: string | null, name: string) {
 }
 
 function getCookieHeader() {
-  const headerSource = headers();
+  const headerSource: any = headers();
   if (typeof headerSource.get === "function") {
     return headerSource.get("cookie");
   }

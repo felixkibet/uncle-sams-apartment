@@ -89,11 +89,17 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     }
   }, [key]);
 
-  function set(val: T) {
-    setValue(val);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(key, JSON.stringify(val));
-    }
+  function set(val: T | ((prev: T) => T)) {
+    setValue((prev) => {
+      const next =
+        typeof val === "function" ? (val as (p: T) => T)(prev) : (val as T);
+      if (typeof window !== "undefined") {
+        try {
+          window.localStorage.setItem(key, JSON.stringify(next));
+        } catch {}
+      }
+      return next;
+    });
   }
 
   return [value, set] as const;
